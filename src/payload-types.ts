@@ -69,6 +69,11 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'about-page': AboutPage;
+    'contact-page': ContactPage;
+    gallery: Gallery;
+    sponsor: Sponsor;
+    'team-member': TeamMember;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,16 +83,28 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'about-page': AboutPageSelect<false> | AboutPageSelect<true>;
+    'contact-page': ContactPageSelect<false> | ContactPageSelect<true>;
+    gallery: GallerySelect<false> | GallerySelect<true>;
+    sponsor: SponsorSelect<false> | SponsorSelect<true>;
+    'team-member': TeamMemberSelect<false> | TeamMemberSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
-  globals: {};
-  globalsSelect: {};
+  fallbackLocale: null;
+  globals: {
+    'home-about': HomeAbout;
+    footer: Footer;
+  };
+  globalsSelect: {
+    'home-about': HomeAboutSelect<false> | HomeAboutSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+  };
   locale: null;
   user: User & {
     collection: 'users';
@@ -120,7 +137,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -144,7 +161,7 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -160,10 +177,153 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page".
+ */
+export interface AboutPage {
+  id: number;
+  title: string;
+  /**
+   * URL-friendly identifier (auto-generated from title)
+   */
+  slug: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page".
+ */
+export interface ContactPage {
+  id: number;
+  heroTitle: string;
+  heroIntro: string;
+  teamEmail: string;
+  sponsorTab: {
+    label: string;
+    description: string;
+    formHeading: string;
+    formSubtitle: string;
+    highlights?:
+      | {
+          highlight?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  joinTab: {
+    label: string;
+    description: string;
+    formHeading: string;
+    formSubtitle: string;
+    meetings?:
+      | {
+          label: string;
+          time: string;
+          location: string;
+          id?: string | null;
+        }[]
+      | null;
+    highlights?:
+      | {
+          highlight?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery".
+ */
+export interface Gallery {
+  id: number;
+  title: string;
+  description: string;
+  images: {
+    image: number | Media;
+    /**
+     * Alt text for the image (accessibility)
+     */
+    alt?: string | null;
+    /**
+     * Optional caption for the image
+     */
+    caption?: string | null;
+    id?: string | null;
+  }[];
+  /**
+   * Used for manual ordering (lexicographic)
+   */
+  orderRank?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsor".
+ */
+export interface Sponsor {
+  id: number;
+  name: string;
+  logo?: (number | null) | Media;
+  /**
+   * Alt text for the logo (accessibility)
+   */
+  alt?: string | null;
+  /**
+   * Sponsor website URL
+   */
+  website?: string | null;
+  /**
+   * Used for manual ordering (lexicographic)
+   */
+  orderRank?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-member".
+ */
+export interface TeamMember {
+  id: number;
+  name: string;
+  image: number | Media;
+  /**
+   * Alt text for the image (accessibility)
+   */
+  alt?: string | null;
+  role?: string | null;
+  /**
+   * Used for manual ordering (lexicographic)
+   */
+  orderRank?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -180,20 +340,40 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'about-page';
+        value: number | AboutPage;
+      } | null)
+    | ({
+        relationTo: 'contact-page';
+        value: number | ContactPage;
+      } | null)
+    | ({
+        relationTo: 'gallery';
+        value: number | Gallery;
+      } | null)
+    | ({
+        relationTo: 'sponsor';
+        value: number | Sponsor;
+      } | null)
+    | ({
+        relationTo: 'team-member';
+        value: number | TeamMember;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -203,10 +383,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -226,7 +406,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -274,6 +454,109 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page_select".
+ */
+export interface AboutPageSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contact-page_select".
+ */
+export interface ContactPageSelect<T extends boolean = true> {
+  heroTitle?: T;
+  heroIntro?: T;
+  teamEmail?: T;
+  sponsorTab?:
+    | T
+    | {
+        label?: T;
+        description?: T;
+        formHeading?: T;
+        formSubtitle?: T;
+        highlights?:
+          | T
+          | {
+              highlight?: T;
+              id?: T;
+            };
+      };
+  joinTab?:
+    | T
+    | {
+        label?: T;
+        description?: T;
+        formHeading?: T;
+        formSubtitle?: T;
+        meetings?:
+          | T
+          | {
+              label?: T;
+              time?: T;
+              location?: T;
+              id?: T;
+            };
+        highlights?:
+          | T
+          | {
+              highlight?: T;
+              id?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gallery_select".
+ */
+export interface GallerySelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        caption?: T;
+        id?: T;
+      };
+  orderRank?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sponsor_select".
+ */
+export interface SponsorSelect<T extends boolean = true> {
+  name?: T;
+  logo?: T;
+  alt?: T;
+  website?: T;
+  orderRank?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "team-member_select".
+ */
+export interface TeamMemberSelect<T extends boolean = true> {
+  name?: T;
+  image?: T;
+  alt?: T;
+  role?: T;
+  orderRank?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -311,6 +594,91 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-about".
+ */
+export interface HomeAbout {
+  id: number;
+  title: string;
+  /**
+   * Plain text content for the TextReveal animation on the homepage
+   */
+  description: string;
+  /**
+   * Text displayed on the call-to-action button
+   */
+  linkText: string;
+  /**
+   * Select which About Page to link to
+   */
+  linkPage?: (number | null) | AboutPage;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  pages?:
+    | {
+        label: string;
+        href: string;
+        external?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  social?:
+    | {
+        label: string;
+        href: string;
+        platform: 'x' | 'linkedin' | 'github' | 'custom';
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "home-about_select".
+ */
+export interface HomeAboutSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  linkText?: T;
+  linkPage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  pages?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        external?: T;
+        id?: T;
+      };
+  social?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        platform?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

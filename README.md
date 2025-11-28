@@ -62,6 +62,10 @@ Alternatively, you can use [Docker](https://www.docker.com) to spin up this temp
 
 That's it! The Docker instance will help you get up and running quickly while also standardizing the development environment across your teams.
 
+## Admin access control
+
+To gate the Payload admin UI at `/admin`, set `ADMIN_BASIC_USER` and `ADMIN_BASIC_PASS` in your environment. When those variables are defined, the app will require matching HTTP Basic Auth credentials before rendering the admin login screen. If they are unset, the admin UI remains publicly reachable (as before).
+
 ## Questions
 
 If you have any issues or questions, reach out to us on [Discord](https://discord.com/invite/payload) or start a [GitHub discussion](https://github.com/payloadcms/payload/discussions).
